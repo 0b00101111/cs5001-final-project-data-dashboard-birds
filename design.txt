@@ -1,0 +1,31 @@
+Data Sets:
+Two datasets, snowy_owl_records.csv and snowy_owl_trend.csv are used in this project. The sources are as below:
+1. Snowy Owl Records Dataset
+Source: eBird Basic Dataset
+Description: Contains detailed records of Snowy Owl sightings, including geographic coordinates, observation counts,
+dates, and observer information.
+URL: https://github.com/0b00101111/cs5001-final-project-data-dashboard-birds/blob/8044a4dd0e3248f5f97f90872a1eb55cfd90e0e3/snowy_owl_record.csv
+
+2. Snowy Owl Trend Dataset
+Source: NatureCounts
+Description: Provides annual trends in Snowy Owl populations, including population estimates, migration patterns,
+and habitat changes.
+URL: https://github.com/0b00101111/cs5001-final-project-data-dashboard-birds/blob/8044a4dd0e3248f5f97f90872a1eb55cfd90e0e3/snowy_owl_trend.csv
+
+Classes and Objectives:
+I created two classes: BirdObservation and SnowyOwlTrend. The BirdObservation class will represent detailed data of the
+observation record of snowy owl in Canada, including identifiers, common and scientific names, geographic coordinates,
+observation dates, observer IDs, and counts. The SnowyOwlTrend class will represent the data which demonstrate the amount
+ of snowy owls in recent 52 years, including the index and its confidence intervals. I created those classes in the way
+ that, when an object is initiated, a pandas dataframe will be created based on the dataset, and provided some basic
+ method such as get_descriptive_summary.
+
+Intended Data Analysis
+The most important analysis in my plan is to see the correlation between the observation data and the (estimated) population
+data of a bird species(in this project, Snowy Owl is used as an example). Observations are self_reported records from volunteers
+who log the essential data with the ebird application when see or hear a bird. The population data, on the other hand,
+though still not accurate numbers, is collected and calculated in a more systematic and scientific way.
+
+User Interaction and Visualization
+In Milestone 2, I plan to develop analysis includes a hotspot map of Snowy Owls in Canada, a bar chart to show the observation
+ counts for each month, allowing a user to filter this bar chart to see data of a certain year for the purpose of interaction.
