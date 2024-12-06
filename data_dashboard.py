@@ -3,6 +3,18 @@ import requests
 import csv
 from classes.bird_observation import BirdObservation
 from classes.snowy_owl_trend import SnowyOwlTrend
+import tkinter as tk
+
+from visualizations import (
+    plot_observations_by_year,
+    plot_correlation,
+    plot_monthly_observations,
+    interpret_correlation,
+    plot_population_trend
+    )
+
+from gui import DataDashboardGUI
+
 
 # Download, parse and load data.
 def download_csv(url):
@@ -14,10 +26,9 @@ def download_csv(url):
         csv_content = response.content.decode('utf-8')
         print(f"Data downloaded successfully from {url}.")
         return csv_content
-    except Exception as e:
-        print(f"Error while downloading data: {e}")
+    except requests.exceptions.RequestException as e:
+        print(f"Error while downloading data from {url}: {e}")
         return None
-
 
 
 def parse_csv(csv_content):
@@ -29,8 +40,14 @@ def parse_csv(csv_content):
         reader = csv.DictReader(csv_lines)
         data_list = [row for row in reader]
         return data_list
+    except csv.Error as e:
+        print(f"CSV parsing error: {e}")
+        return []
+    except TypeError as te:
+        print(f"Type error while parsing CSV: {te}")
+        return []
     except Exception as e:
-        print(f"Error while parsing data: {e}")
+        print(f"Unexpected error while parsing CSV: {e}")
         return []
 
 
@@ -40,8 +57,15 @@ def load_csv_into_dataframe(data_list):
         # strip whitespace from column names
         df.columns = df.columns.str.strip()
         return df
+    except TypeError as te:
+        print(f"Type error while loading data into DataFrame: {te}")
+        return None
+    except ValueError as ve:
+        print(f"Value error while loading data into DataFrame: {ve}")
+        return None
     except Exception as e:
-        print(f"Error while loading data: {e}")
+        print(
+            f"Unexpected error while loading data into DataFrame: {e}")
         return None
 
 
@@ -51,12 +75,39 @@ def clean_data_for_observation(bird_observations_df):
     Clean the data to get correct data types.
     """
     try:
+        # Replace 'X' with 1 in 'OBSERVATION COUNT' and convert to numeric
         bird_observations_df['OBSERVATION COUNT'] = bird_observations_df['OBSERVATION COUNT'].replace('X', 1)
         bird_observations_df['OBSERVATION COUNT'] = pd.to_numeric(
                 bird_observations_df['OBSERVATION COUNT'], errors='coerce')
+
+        # Convert 'OBSERVATION DATE' to datetime format
+        bird_observations_df['OBSERVATION DATE'] = pd.to_datetime(
+                bird_observations_df['OBSERVATION DATE'],
+                errors='coerce'
+                )
+
+        # Drop rows with invalid 'OBSERVATION DATE'
+        bird_observations_df = bird_observations_df.dropna(
+            subset=['OBSERVATION DATE']).reset_index(drop=True)
+
+        # Extract 'Year', 'Month', and 'Day' from 'OBSERVATION DATE'
+        bird_observations_df['Year'] = bird_observations_df[
+            'OBSERVATION DATE'].dt.year
+        bird_observations_df['Month'] = bird_observations_df[
+            'OBSERVATION DATE'].dt.month
+        bird_observations_df['Day'] = bird_observations_df[
+            'OBSERVATION DATE'].dt.day
+
+        return bird_observations_df
+
+    except KeyError as ke:
+        print(f"Key error while cleaning data: {ke}")
+        return bird_observations_df
+    except ValueError as ve:
+        print(f"Value error while cleaning data: {ve}")
         return bird_observations_df
     except Exception as e:
-        print(f"Error while cleaning data: {e}")
+        print(f"Unexpected error while cleaning data: {e}")
         return bird_observations_df
 
 
@@ -86,8 +137,15 @@ def clean_data_for_population(population_trend_df):
                 )
         population_trend_df = population_trend_df.reset_index(drop=True)
         return population_trend_df
+
+    except KeyError as ke:
+        print(f"Key error while cleaning population data: {ke}")
+        return population_trend_df
+    except ValueError as ve:
+        print(f"Value error while cleaning population data: {ve}")
+        return population_trend_df
     except Exception as e:
-        print(f"Error while cleaning data: {e}")
+        print(f"Unexpected error while cleaning population data: {e}")
         return population_trend_df
 
 
@@ -124,27 +182,16 @@ def analyze_correlation(bird_observation, snowy_owl_trend):
                 }
 
         return correlation_results
-    except Exception as e:
-        print(f"Error while analyzing correlation: {e}")
+
+    except KeyError as ke:
+        print(f"Key error while analyzing correlation: {ke}")
         return {}
-
-
-def interpret_correlation(coefficient):
-    """
-    Provide an interpretation of the correlation coefficient
-    """
-    if coefficient > 0.7:
-        return "strong positive"
-    elif 0.3 < coefficient < 0.7:
-        return "moderate positive"
-    elif 0 < coefficient < 0.3:
-        return "weak positive"
-    elif -0.3 < coefficient < 0:
-        return "weak negative"
-    elif -0.7 < coefficient < -0.3:
-        return "moderate negative"
-    else:
-        return "strong negative"
+    except ValueError as ve:
+        print(f"Value error while analyzing correlation: {ve}")
+        return {}
+    except Exception as e:
+        print(f"Unexpected error while analyzing correlation: {e}")
+        return {}
 
 
 def main():
@@ -196,5 +243,17 @@ def main():
     correlation_results = analyze_correlation(bird_observation, snowy_owl_trend)
     print(correlation_results)
 
+    # Plot the visualizations (commented out when run the GUI)
+    # plot_observations_by_year(bird_observation)
+    # plot_monthly_observations(bird_observation)
+    # plot_population_trend(snowy_owl_trend)  # Add this line if you want to plot automatically
+    # plot_correlation(bird_observation, snowy_owl_trend)
+
+    # Init and run the GUI
+    root = tk.Tk()
+    app = DataDashboardGUI(root, bird_observation, snowy_owl_trend)
+    app.run()
+
 if __name__ == '__main__':
     main()
+

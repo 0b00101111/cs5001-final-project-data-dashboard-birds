@@ -8,6 +8,10 @@ class BirdObservation:
         """
         Initialize an instance  with a dataframe and load the data.
         """
+        if not isinstance(dataframe, pd.DataFrame):
+            raise TypeError(
+                "The provided data must be a pandas DataFrame.")
+
         self.data = dataframe
 
     def peek_the_data(self, n=10):
