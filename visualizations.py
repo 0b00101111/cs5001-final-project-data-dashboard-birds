@@ -19,18 +19,14 @@ def plot_observations_by_year(bird_observation):
         observations_per_year = bird_observation.aggregate_observations_by_year()
 
         # Drop years with missing data and convert 'Year' to integers
-        observations_per_year = observations_per_year.dropna(
-            subset=['Year'])
-        observations_per_year['Year'] = observations_per_year[
-            'Year'].astype(int)
+        observations_per_year = observations_per_year.dropna(subset=['Year'])
+        observations_per_year['Year'] = observations_per_year['Year'].astype(int)
 
         # Sort data by 'Year'
-        observations_per_year = observations_per_year.sort_values(
-            'Year')
+        observations_per_year = observations_per_year.sort_values('Year')
 
         # Create the figure and axis
-        fig, ax = plt.subplots(
-            figsize=(4, 2))
+        fig, ax = plt.subplots(figsize=(4, 2))
         fig.tight_layout()
 
         # Set background color to match GUI
@@ -39,10 +35,10 @@ def plot_observations_by_year(bird_observation):
 
         # Create the bar chart
         ax.bar(
-                observations_per_year['Year'],
-                observations_per_year['OBSERVATION COUNT'],
-                color='skyblue'
-                )
+            observations_per_year['Year'],
+            observations_per_year['OBSERVATION COUNT'],
+            color='skyblue'
+        )
         ax.set_xlabel('Year', fontsize=10)
         ax.set_ylabel('Total Observations', fontsize=10)
         ax.set_title('Snowy Owl Observations by Year', fontsize=12)
@@ -69,21 +65,16 @@ def plot_monthly_observations(bird_observation):
     try:
         # Ensure date components are extracted
         if 'Month' not in bird_observation.data.columns:
-            bird_observation.data['Month'] = bird_observation.data[
-                'OBSERVATION DATE'].dt.month
+            bird_observation.data['Month'] = bird_observation.data['OBSERVATION DATE'].dt.month
 
         # Aggregate observations by month
-        observations_per_month = \
-        bird_observation.data.groupby('Month')[
-            'OBSERVATION COUNT'].sum().reset_index()
+        observations_per_month = bird_observation.data.groupby('Month')['OBSERVATION COUNT'].sum().reset_index()
 
         # Sort by Month
-        observations_per_month = observations_per_month.sort_values(
-            'Month')
+        observations_per_month = observations_per_month.sort_values('Month')
 
         # Create the figure and axis
-        fig, ax = plt.subplots(
-            figsize=(4, 2))
+        fig, ax = plt.subplots(figsize=(4, 2))
 
         # Set background color to match GUI
         fig.patch.set_facecolor('#ECECEC')
@@ -91,19 +82,17 @@ def plot_monthly_observations(bird_observation):
 
         # Plotting
         ax.plot(
-                observations_per_month['Month'],
-                observations_per_month['OBSERVATION COUNT'],
-                marker='o',
-                linestyle='-',
-                color='seagreen',
-                label='Monthly Observations'
-                )
+            observations_per_month['Month'],
+            observations_per_month['OBSERVATION COUNT'],
+            marker='o',
+            linestyle='-',
+            color='seagreen'
+        )
         ax.set_xlabel('Month', fontsize=10)
         ax.set_ylabel('Total Observations', fontsize=10)
         ax.set_title('Snowy Owl Observations by Month', fontsize=12)
         ax.set_xticks(range(1, 13))
         ax.grid(True, linestyle='--', alpha=0.5)
-        ax.legend(fontsize=8)
 
         return fig
 
@@ -130,8 +119,7 @@ def plot_population_trend(snowy_owl_trend):
         trend_data = trend_data.sort_values('Year')
 
         # Create the figure and axis
-        fig, ax = plt.subplots(
-            figsize=(4, 2))
+        fig, ax = plt.subplots(figsize=(4, 2))
         fig.tight_layout()
 
         # Set background color to match GUI
@@ -153,8 +141,7 @@ def plot_population_trend(snowy_owl_trend):
         # Set labels and title
         ax.set_xlabel('Year', fontsize=10)
         ax.set_ylabel('Population Index', fontsize=10)
-        ax.set_title('Snowy Owl Population Index Trend Over Years',
-                     fontsize=12)
+        ax.set_title('Snowy Owl Population Index Trend Over Years', fontsize=12)
         ax.legend(fontsize=8)
         ax.grid(True, linestyle='--', alpha=0.5)
 
@@ -205,24 +192,19 @@ def plot_correlation(bird_observation, snowy_owl_trend):
         observations_per_year = bird_observation.aggregate_observations_by_year()
         trend_data = snowy_owl_trend.data.copy()
 
-        merged_data = pd.merge(observations_per_year, trend_data,
-                               on='Year', how='inner')
+        merged_data = pd.merge(observations_per_year, trend_data, on='Year', how='inner')
         if merged_data.empty:
             print("No common years between datasets for plotting.")
             return None
 
         # Calculate correlation coefficient
-        correlation_coefficient = merged_data[
-            'OBSERVATION COUNT'].corr(
-                merged_data['Index'], method='pearson')
+        correlation_coefficient = merged_data['OBSERVATION COUNT'].corr(merged_data['Index'], method='pearson')
 
         # Get interpretation
-        interpretation = interpret_correlation(
-            correlation_coefficient)
+        interpretation = interpret_correlation(correlation_coefficient)
 
         # Create the figure and axis
-        fig, ax1 = plt.subplots(
-            figsize=(4, 2))
+        fig, ax1 = plt.subplots(figsize=(4, 2))
         fig.tight_layout()
 
         # Set background color to match GUI
@@ -230,33 +212,31 @@ def plot_correlation(bird_observation, snowy_owl_trend):
         ax1.set_facecolor('#ECECEC')
 
         # Plot Observations as bars
-        ax1.bar(merged_data['Year'], merged_data['OBSERVATION COUNT'],
-                color='orchid', label='Observations')
+        ax1.bar(merged_data['Year'], merged_data['OBSERVATION COUNT'], color='orchid', label='Observations')
         ax1.set_xlabel('Year', fontsize=10)
         ax1.set_ylabel('Observation Count', color='purple', fontsize=10)
         ax1.tick_params(axis='y', labelcolor='purple')
 
         # Plot Population Index as a line
         ax2 = ax1.twinx()
-        ax2.plot(merged_data['Year'], merged_data['Index'],
-                 color='darkorange',
+        ax2.plot(merged_data['Year'], merged_data['Index'], color='darkorange',
                  marker='o', label='Population Index')
         ax2.set_ylabel('Population Index', color='darkorange', fontsize=10)
         ax2.tick_params(axis='y', labelcolor='darkorange')
 
         # Set title
-        plt.title(
-            'Correlation Between Observations and Population Index Over Years',
-            fontsize=12)
+        plt.title('Correlation Between Observations and Population Index Over Years', fontsize=12)
 
         # Add correlation details as text
         textstr = f"Pearson Correlation Coefficient: {correlation_coefficient:.2f}\nInterpretation: {interpretation}"
-        plt.text(0.05, 0.95, textstr,
-                 transform=plt.gca().transAxes, fontsize=8,
-                 verticalalignment='top',
-                 bbox=dict(boxstyle="round,pad=0.3",
-                           facecolor="white",
-                           alpha=0.5))
+        plt.text(
+            0.05, 0.60,  # Adjusted position to lower part of the plot
+            textstr,
+            transform=plt.gca().transAxes,
+            fontsize=8,
+            verticalalignment='bottom',
+            bbox=dict(boxstyle="round,pad=0.3", facecolor="white", alpha=0.5)
+        )
 
         # Adjust legends for both axes
         ax1.legend(loc='upper left', fontsize=8)
@@ -270,8 +250,3 @@ def plot_correlation(bird_observation, snowy_owl_trend):
     except Exception as e:
         print(f"Error while plotting correlation: {e}")
         return None
-
-
-
-
-
